@@ -33,7 +33,6 @@ return M.at[j].set(val)
 M = lax.fori_loop(0, n, backward_body, M)
 # === Spline coefficients ===
 a = jnp.array(y[:-1])
-22
 b = jnp.array((y[1:] - y[:-1]) / h - h * (2*M[:-1] + M[1:]) / 3)
 c = jnp.array(M[:-1])
 d = jnp.array((M[1:] - M[:-1]) / (3 * h))
