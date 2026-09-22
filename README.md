@@ -1,92 +1,32 @@
-# JAX TOV Structure
+# JAX TOV structure
 
-This repository contains a JAX-based numerical solver for the Tolman–Oppenheimer–Volkoff (TOV) equations, which describe the internal structure of static, spherically symmetric neutron stars in general relativity. The solver supports spline-based equations of state, Runge–Kutta 4th-order integration, and automatic surface extrapolation using JAX and `lax.scan`.
+Numerical building blocks from a BSc final-year project (Mathematics and Physics, University of Bath, 2025) on integrating the Tolman-Oppenheimer-Volkoff equations for slowly rotating neutron stars in JAX: a differentiable cubic-spline equation of state, a fourth-order Runge-Kutta step, `lax.scan` integration that stops at the stellar surface, and a quadratic extrapolation of the radius to the surface pressure.
 
----
+## Files
 
-## 📘 Features
+| file | what it is |
+|---|---|
+| `spline.py` | natural cubic spline interpolant for the equation of state, built with `lax.fori_loop` so it can be jitted and differentiated |
+| `rk4.py` | one fourth-order Runge-Kutta step |
+| `tov_scan.py` | outward integration with `lax.scan`; the state carries mass, density, the frame-dragging function and its derivative, and the metric potential, and freezes once the pressure drops below the surface value |
+| `tov_scan_tracked.py` | the same integration keeping the last three valid steps |
+| `surface_extrapolation.py` | quadratic fit through those three steps to place the surface at the table's minimum pressure, then one final RK4 step to it |
 
-* RK4 integrator for TOV and related ODE systems
-* Natural cubic spline EOS interpolation (JAX differentiable)
-* `lax.scan`-based integration with logical stopping condition
-* Extrapolation of radius at surface pressure using quadratic fit
-* JAX autodiff compatible for future gradient-based analysis
+These are the pieces as they were used in the project, not a packaged solver. The TOV right-hand side `f`, the `pressure(rho)` closure from the spline, the equation-of-state table and the starting state are set up in the project notebook and are not included here.
 
----
-
-## 📁 Repository Structure
+## Requirements
 
 ```
-jax-tov-structure/
-├── README.md
-├── requirements.txt
-├── src/
-│   ├── spline.py             # Natural cubic spline function
-│   ├── rk4.py                # RK4 integrator step
-│   ├── tov_scan.py           # Integration with scan + extrapolation
-│   ├── eos_loader.py         # (Optional) EOS loading and preprocessing
-│   └── main.py               # Main example runner
-├── figures/                  # Output figures (e.g., M-R plots)
-├── data/                     # EOS tables (pressure-density)
+pip install jax jaxlib
 ```
 
----
+## References
 
-## 🧠 Core Functions
+- Hartle, J. B. (1967), Slowly rotating relativistic stars
+- Yagi, K. and Yunes, N. (2013), I-Love-Q relations
+- CompOSE equation-of-state database
+- JAX: https://github.com/google/jax
 
-### `natural_cubic_spline(x, y)`
+## Licence
 
-Returns a JAX-compatible callable cubic spline interpolant for the EOS.
-
-### `rk4_step(x, r, dr, f)`
-
-Performs a single 4th-order Runge–Kutta integration step.
-
-### `extrapolated_surface_step(P_surface, pressure, r0, x0, dr, f)`
-
-Integrates outward in radius using `lax.scan` until pressure drops below `P_surface`. Then, it applies a quadratic fit to extrapolate the true surface radius and final state.
-
----
-
-## ▶️ Running the Code
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Then, run:
-
-```bash
-python src/main.py
-```
-
----
-
-## 📈 Output
-
-* Final radius and mass at surface pressure
-* Intermediate integration history (optional)
-* Figures for $M(R)$, sensitivity, or EOS-dependent results
-
----
-
-## 📝 License
-
-MIT License
-
----
-
-## 👤 Author
-
-Isaac Dodds – 2025 BSc Physics Final Year Project
-
----
-
-## 🔬 References
-
-* Hartle, J. B. (1967). Slowly Rotating Relativistic Stars.
-* Yagi & Yunes (2013). I-Love-Q Relations.
-* CompOSE EOS database
-* JAX: [https://github.com/google/jax](https://github.com/google/jax)
+MIT. See `LICENSE`.
